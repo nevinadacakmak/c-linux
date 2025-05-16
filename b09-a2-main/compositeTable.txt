@@ -1,0 +1,16 @@
+PID	FD	Filename	Inode
+========================================
+130201	0	/dev/null	5
+130201	1	socket:[1173362]	1173362
+130201	2	socket:[1173362]	1173362
+130201	3	anon_inode:[eventfd]	2083
+130201	4	anon_inode:[eventfd]	2083
+130201	5	socket:[1208344]	1208344
+130201	6	anon_inode:[eventfd]	2083
+130201	7	anon_inode:inotify	2083
+130201	8	socket:[1189582]	1189582
+130201	9	anon_inode:[eventfd]	2083
+130201	10	anon_inode:[eventfd]	2083
+130201	11	socket:[1208345]	1208345
+130201	12	/cmshome/cakmakne/.local/share/evolution/addressbook/system/contacts.db	696715577
+========================================

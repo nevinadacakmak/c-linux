@@ -1,0 +1,8 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/nevinadacakmak/Desktop/Second Year/B09/b09-a1/b09a1final/assignment1'
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _graph, symObjAddr: 0x0, symBinAddr: 0x100002D2C, symSize: 0x6CC }
+  - { offsetInCU: 0x57, offset: 0x57, size: 0x8, addend: 0x0, symName: _graph, symObjAddr: 0x0, symBinAddr: 0x100002D2C, symSize: 0x6CC }
+  - { offsetInCU: 0x1B4, offset: 0x1B4, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x6CC, symBinAddr: 0x1000033F8, symSize: 0x7E0 }
+...

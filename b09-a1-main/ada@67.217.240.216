@@ -1,0 +1,206 @@
+/* 
+
+//TODO
+//test that it gets values correctly b4 working on graphing
+//get the logic for graphing before implementing it to sample size and delay
+//add a big loop for tdelay and samples, then go over the demo video and piazza
+
+Write a C program that will report different metrics of the utilization of a given system as described below.
+The program will present this information in real-time in graphical form by displaying at each instant of time how the quantities are changing.
+
+#escape code
+"\033[2J"        clear the screen  
+"\033[H"         position cursor at top-left corner 
+printf("\x1b[%d;%df", row, col);   move to position col,row  
+
+./myMonitoringTool [samples [tdelay]] [--memory] [--cpu] [--cores] [--samples=N] [--tdelay=T]
+
+*/
+
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
+
+int main(int argc, char* argv[])
+{
+    int samp = 20;
+    int delay = 500000; 
+    int mem = 1;
+    int cp = 1;
+    int core = 1;
+
+    int numofcores;
+
+    //parsing
+    //mem cp and core can appear in any order, and they are boolean
+    //samp and tdelay do come first if they are used. if only one number, it is samp
+
+    //better implementation? use logic if you wanna fix it
+
+    for (int i = 1; i < argc; i++)
+    {
+        //printf("%s\n", argv[i]);
+
+        if ((i==1) && (isdigit(*argv[i]))) //ASSUMPTION
+        {
+            samp = atoi(argv[i]);
+        }
+
+        else if ((i==2) && (isdigit(*argv[i]))) //ASSUMPTION
+        {
+            delay = atoi(argv[i]);
+        }
+        else if (strcmp(argv[i], "--memory") == 0)
+        {
+            mem = 2;
+        }
+        else if (strcmp(argv[i],"--cpu") == 0)
+        {
+            cp = 2;
+        }
+        else if (strcmp(argv[i],"--cores") == 0)
+        {
+            core = 2;
+        }
+        else if (strncmp(argv[i], "--samples=", 10) == 0) //ASSUMPTION
+        {
+            samp = atoi(argv[i]+10);
+        }
+        else if (strncmp(argv[i], "--tdelay=", 9) == 0) //ASSUMPTION
+        {
+            delay = atoi(argv[i]+9);
+        }
+        else
+        {
+            printf("Problem, skipped all cases??? Bruh you have wrong input!!\n");
+        }
+    }
+    //printf("samp: %d delay: %d mem: %d cp: %d core:%d\n",samp, delay, mem, cp, core);
+
+    // finding values
+    //cpu, memory, cores. do not hardcode anything
+    /*
+    running parameters:
+    number of samples
+    samples frequency
+
+    memory usage
+    plot memory utilization per sample in GB
+    display axes with memory limits scale
+
+    cpu usage
+    report how much utilization of the CPU is being done in percentage
+    plot CPU utilization per sample in %
+    display corresponding axes
+
+    cores
+    report number of cores and max. frequency
+    diagram matching the number of detected cores
+    */
+
+    FILE* memo_info = fopen("/proc/meminfo","r");
+    FILE* cpu_info = fopen("/proc/cpuinfo","r");
+    FILE* stat_info = fopen("/proc/stat","r");
+
+    //"Memory Utilization",
+    char buffer[32];
+    char buffer4[32];
+    char dummy[50];
+
+    //step1: find used memo (line3 - line1)
+    char* overall_memo = fgets(buffer,32,memo_info); //PROBLEM!!
+    fgets(buffer,32,memo_info);
+    char* used_memo = fgets(buffer4, 32, memo_info); //PROBLEM!!
+
+    long int used_value;
+    long int overall_value;
+
+    sscanf(overall_memo,"%s %ld %s",&dummy[0],&overall_value,&dummy[1]);
+    sscanf(used_memo,"%s %ld %s",&dummy[2],&used_value,&dummy[3]);
+
+    //printf("overall memory: %s\n",overall_memo);
+    //printf("used memory:%s\n",used_memo);
+
+    //printf("used value: %ld\n", used_value);
+    //printf("overall value: %ld\n", overall_value);
+
+    //turn them to int and get the difference and save it
+    long int memo_util = overall_value - used_value;
+    
+    //step2: graph it realtime:
+
+    //"CPU"
+
+    //cpu util:(sum - idle / sum) x cores x100?
+    //cpu  3007499 7876 2611254 2924801017 116517 0 11068 0 0 0
+
+    //step 1: find util (sum over the first column minus 4th and 5th ones over sum) times core? times 100
+
+    //i forgot to allocate memory everywhere bruh !!!
+
+    char buffer2[256]; //is this how i do it?
+    char* cpu_calc = fgets(buffer2, 256, stat_info);
+    long int sum = 0;
+    double cpu_value;
+    printf("cpu: %s\n",cpu_calc);
+
+    //slice by space 
+
+    long int v1,v2,v3,v4,v5,v6,v7,v8,v9,v10;
+    char bleh[32];
+
+    sscanf(cpu_calc, "%s %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld", &bleh, &v1, &v2, &v3, &v4, &v5, &v6, &v7, &v8, &v9, &v10);
+    sum = v1 + v2 + v3 + v4 + v5 + v6 + v7 + v8 + v9 + v10;
+    long int idle = 0;
+    idle = sum - v4 - v5;
+    cpu_value = ((sum - idle)/sum)*100;
+    
+    /*char* cpu_calc_div=strtok(cpu_calc," "); //or just scanf with fscanf(file, "% % % ", & & & etc);
+    int len = sizeof(*cpu_calc_div) / sizeof(cpu_calc_div[0]);
+    
+    for(int i = 0; i < len; i++)
+    {
+        //printf("%s",cpu_calc_div[i]);
+        sum += (int)cpu_calc_div[i];
+        printf("%d",cpu_calc_div[i]);
+    }
+    long int idle = 0;
+    idle = sum - cpu_calc_div[3] - cpu_calc_div[4];  */
+
+    cpu_value = ((sum - idle)/sum)*100; //*numofcores or no? (geremy says no)
+    printf("sum: %ld idle: %ld\n", sum, idle); //PROBLEM!!
+    printf("util value:%f\n",cpu_value);
+    
+
+    //step 2: graph it
+    
+    //"Cores"
+    //siblings in the proc/cpuinfo
+
+    //step 1: find siblings and max frequency
+    // cpu_info is the file for /proc/stat
+    // check till you see the word "sibling", thats what we need
+    char buffer3[256];
+    char line[256];
+    int maxfreq = 0;
+    
+    FILE* maxfreqfile = fopen("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq","r");
+
+    for(int i = 0; i < 11; i++)
+    {
+        fgets(line, 256, cpu_info);
+        //printf("%s",line);
+    }
+    numofcores = atoi(line+11); //ASSUMPTION
+
+    //printf("line: %s",line);
+    
+    //maxfreq = atoi(fgets(*buffer3,256,maxfreqfile)); 
+    
+    //printf("maxfreq: %d number of cores: %d\n",maxfreq, numofcores);
+    
+    //step 2: draw a diagram for the num of cores (by groups of 4)
+    
+    return 0;
+}
